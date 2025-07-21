@@ -25,8 +25,8 @@ class DebugManager {
             
             // Obstacles
             spawnDelay: 150,
-            minGap: 200,
-            maxGap: 280,
+            minGap: 210,
+            maxGap: 294,
             obstacleWidth: 50,
             horizontalSpacing: 120,
             
