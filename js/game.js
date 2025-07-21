@@ -469,19 +469,32 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize debug manager after game is ready with retry
     const initDebugManager = () => {
+        console.log('Attempting to initialize debug manager...');
+        console.log('DebugManager available?', typeof DebugManager !== 'undefined');
+        console.log('Game object:', !!game);
+        
         if (typeof DebugManager !== 'undefined') {
             try {
+                console.log('Creating new DebugManager instance...');
                 window.debugManager = new DebugManager(game);
+                console.log('Debug manager initialized successfully');
             } catch (error) {
+                console.error('Failed to initialize debug manager:', error);
+                console.error('Error stack:', error.stack);
                 // Retry once after a longer delay
                 setTimeout(() => {
                     try {
+                        console.log('Retrying debug manager initialization...');
                         window.debugManager = new DebugManager(game);
+                        console.log('Debug manager initialized on retry');
                     } catch (retryError) {
-                        // Silent failure
+                        console.error('Debug manager retry failed:', retryError);
+                        console.error('Retry error stack:', retryError.stack);
                     }
                 }, 500);
             }
+        } else {
+            console.error('DebugManager class not found!');
         }
     };
     

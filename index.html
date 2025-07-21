@@ -196,8 +196,8 @@
                     <h3>🐢 Turtle Tokens</h3>
                     <div class="debug-control">
                         <label>Turtle Spawn Rate</label>
-                        <input type="range" id="apySpawnRate" min="1" max="20" step="1" value="5">
-                        <span class="debug-value">5</span>
+                        <input type="range" id="apySpawnRate" min="1" max="20" step="1" value="10">
+                        <span class="debug-value">10</span>
                     </div>
                     <div class="debug-control">
                         <label>Turtle Token Value</label>
@@ -235,10 +235,10 @@
     <audio id="jumpSound" preload="auto">
         <source src="sounds/player/jump.mp3" type="audio/mpeg">
     </audio>
-    <audio id="landSound" preload="none">
+    <audio id="landSound" preload="auto">
         <source src="sounds/player/land.mp3" type="audio/mpeg">
     </audio>
-    <audio id="scoreSound" preload="none">
+    <audio id="scoreSound" preload="auto">
         <source src="sounds/game/score.mp3" type="audio/mpeg">
     </audio>
     <audio id="apySound" preload="auto">
@@ -250,7 +250,7 @@
     <audio id="uiSound" preload="auto">
         <source src="sounds/ui/button-click.mp3" type="audio/mpeg">
     </audio>
-    <audio id="settingsSound" preload="none">
+    <audio id="settingsSound" preload="auto">
         <source src="sounds/ui/settings-open.mp3" type="audio/mpeg">
     </audio>
     <audio id="backgroundMusic" preload="auto" loop>

@@ -14,8 +14,8 @@ class DebugManager {
             
             // Obstacles
             spawnDelay: 150,
-            minGap: 210,
-            maxGap: 294,
+            minGap: 200,
+            maxGap: 280,
             obstacleWidth: 50,
             horizontalSpacing: 120,
             
@@ -30,7 +30,7 @@ class DebugManager {
             scoreMultiplier: 1.0,
             
             // Turtle Tokens
-            apySpawnRate: 5,
+            apySpawnRate: 10,
             apyBonusValue: 100
         };
         
@@ -94,27 +94,32 @@ class DebugManager {
                           location.protocol === 'file:';
         
         if (!isLocalDev) {
+            console.log('Debug system disabled in production environment');
             this.isEnabled = false;
             return; // Exit debug system entirely for public users
         }
         
         console.log('DebugManager constructor called - Local development environment detected');
+        console.log('Settings button exists?', !!document.getElementById('settingsBtn'));
         this.isEnabled = true;
         
         try {
             this.setupEventListeners();
+            console.log('Event listeners setup completed');
         } catch (error) {
             console.error('Error setting up event listeners:', error);
         }
         
         try {
             this.setupButtonAndCheckboxListeners();
+            console.log('Button and checkbox listeners setup completed');
         } catch (error) {
             console.error('Error setting up button/checkbox listeners:', error);
         }
         
         try {
             this.initializeControls();
+            console.log('Controls initialization completed');
         } catch (error) {
             console.error('Error initializing controls:', error);
         }
@@ -319,7 +324,7 @@ class DebugManager {
     }
     
     applySettings() {
-        if (!this.game.player || !this.game.obstacleManager || !this.isEnabled) return;
+        if (!this.game.player || !this.game.obstacleManager) return;
         
         // Apply player physics settings
         this.game.player.gravity = this.currentSettings.gravity;

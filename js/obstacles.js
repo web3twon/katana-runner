@@ -331,9 +331,15 @@ class ObstacleManager {
         this.bonusSpawnDelay = 120; // frames between bonus spawns (frequent spawning)
         this.minGap = 160;
         this.maxGap = 220;
-        this.baseObstacleWidth = 50;
+        this.baseObstacleWidth = 80;
         this.minHorizontalSpacing = 100; // Minimum pixels between obstacle groups
         
+        // Obstacle-type-specific spacing multipliers
+        this.obstacleSpacingMultipliers = {
+            'pillar': 1.0,
+            'defi_node': 1.0,
+            'liquidation_wall': 1.5  // Extra spacing for wide liquidation walls
+        };
         this.safeZoneHeight = 80; // Guaranteed passable area height
         
         this.obstacleTypes = ['pillar', 'defi_node', 'liquidation_wall'];
@@ -341,7 +347,7 @@ class ObstacleManager {
         
         // Turtle token frequency control
         this.obstacleCount = 0;
-        this.turtleSpawnRate = 10; // Spawn turtle token every N obstacles
+        this.turtleSpawnRate = 5; // Spawn turtle token every N obstacles
     }
     
     reset() {
@@ -409,7 +415,7 @@ class ObstacleManager {
         const obstacleType = this.obstacleTypes[Math.floor(Math.random() * this.obstacleTypes.length)];
         
         // Check if there's enough horizontal spacing from existing obstacles
-        if (!this.canSpawnAtPosition(canvasWidth, obstacleWidth)) {
+        if (!this.canSpawnAtPosition(canvasWidth, obstacleWidth, obstacleType)) {
             return; // Skip spawning if too close to existing obstacles
         }
         
@@ -447,11 +453,32 @@ class ObstacleManager {
         }
     }
     
-    canSpawnAtPosition(x, width) {
+    canSpawnAtPosition(x, width, obstacleType = 'pillar') {
         // Check minimum horizontal spacing from existing obstacles
+        // Use boundary-to-boundary distance to prevent overlapping navigable space
+        const spacingMultiplier = this.obstacleSpacingMultipliers[obstacleType] || 1.0;
+        const requiredSpacing = this.minHorizontalSpacing * spacingMultiplier;
+        
         for (const obstacle of this.obstacles) {
-            const distance = Math.abs(obstacle.x - x);
-            if (distance < this.minHorizontalSpacing) {
+            const existingRightEdge = obstacle.x + obstacle.width;
+            const newLeftEdge = x;
+            const newRightEdge = x + width;
+            const existingLeftEdge = obstacle.x;
+            
+            // Calculate the minimum distance between obstacle boundaries
+            let boundaryDistance;
+            if (newLeftEdge >= existingRightEdge) {
+                // New obstacle is to the right
+                boundaryDistance = newLeftEdge - existingRightEdge;
+            } else if (existingLeftEdge >= newRightEdge) {
+                // New obstacle is to the left
+                boundaryDistance = existingLeftEdge - newRightEdge;
+            } else {
+                // Obstacles would overlap
+                boundaryDistance = 0;
+            }
+            
+            if (boundaryDistance < requiredSpacing) {
                 return false;
             }
         }
