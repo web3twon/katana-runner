@@ -1,16 +1,5 @@
 class DebugManager {
     constructor(game) {
-        // CRITICAL: Immediately check environment and exit if not local development
-        const isLocalDev = location.hostname === 'localhost' || 
-                          location.hostname === '127.0.0.1' || 
-                          location.protocol === 'file:';
-        
-        if (!isLocalDev) {
-            this.isEnabled = false;
-            // Exit immediately - don't initialize ANYTHING in production
-            return;
-        }
-        
         this.game = game;
         this.isVisible = false;
         this.settingsButtonRetries = 0;
