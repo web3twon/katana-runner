@@ -1,0 +1,489 @@
+class KatanaGame {
+    constructor() {
+        this.canvas = document.getElementById('gameCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        
+        this.gameState = 'start'; // 'start', 'playing', 'paused', 'gameOver'
+        this.score = 0;
+        this.highScore = parseInt(localStorage.getItem('katanaHighScore')) || 0;
+        
+        this.gameSpeed = 1.5;
+        this.baseSpeed = 1.5;
+        this.speedIncrease = 0.15;
+        this.speedInterval = 50;
+        this.obstaclePoints = 5;
+        this.distanceRate = 5;
+        this.scoreMultiplier = 1.0;
+        this.backgroundX = 0;
+        
+        this.animationId = null;
+        this.lastTime = 0;
+        
+        this.deltaTime = 0;
+        
+        this.setupCanvas();
+        
+        this.player = new Player(this);
+        this.obstacleManager = new ObstacleManager(this);
+        this.ui = new GameUI(this);
+        
+        // Audio system
+        this.backgroundMusic = document.getElementById('backgroundMusic');
+        this.isMusicPlaying = false;
+        
+        this.setupEventListeners();
+        this.setupUI();
+        
+        this.gameLoop = this.gameLoop.bind(this);
+    }
+    
+    setupCanvas() {
+        // Always use actual window dimensions for mobile
+        if (window.innerWidth <= 768) {
+            // Get actual viewport dimensions
+            const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+            const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+            
+            // Set canvas resolution to match actual screen
+            this.canvas.width = vw;
+            this.canvas.height = vh;
+            
+            // Force CSS to fill entire screen
+            this.canvas.style.width = vw + 'px';
+            this.canvas.style.height = vh + 'px';
+            this.canvas.style.position = 'fixed';
+            this.canvas.style.top = '0';
+            this.canvas.style.left = '0';
+            this.canvas.style.zIndex = '1';
+            this.canvas.style.display = 'block';
+            
+            // Hide game header on mobile to use full screen
+            const header = document.querySelector('.game-header');
+            if (header) {
+                header.style.position = 'absolute';
+                header.style.top = '10px';
+                header.style.left = '10px';
+                header.style.right = '10px';
+                header.style.zIndex = '100';
+                header.style.background = 'rgba(16, 22, 49, 0.8)';
+                header.style.borderRadius = '8px';
+            }
+            
+            console.log('Mobile canvas setup:', this.canvas.width, 'x', this.canvas.height, 'viewport:', vw, 'x', vh);
+        } else {
+            // Desktop: Use container-based sizing
+            const container = this.canvas.parentElement;
+            const containerRect = container.getBoundingClientRect();
+            
+            this.canvas.width = 800;
+            this.canvas.height = 600;
+            
+            const scale = Math.min(containerRect.width / 800, containerRect.height / 600);
+            this.canvas.style.width = (800 * scale) + 'px';
+            this.canvas.style.height = (600 * scale) + 'px';
+            this.canvas.style.position = 'relative';
+            this.canvas.style.zIndex = 'auto';
+        }
+        
+        this.ctx.imageSmoothingEnabled = false;
+        
+        // Store canvas dimensions for game logic
+        this.canvasWidth = this.canvas.width;
+        this.canvasHeight = this.canvas.height;
+        
+        // Single resize handler that works for both orientations
+        const resizeHandler = () => {
+            setTimeout(() => {
+                this.setupCanvas();
+                // Reset player position to prevent going off-screen
+                if (this.player) {
+                    this.player.reset();
+                }
+            }, 100);
+        };
+        
+        window.addEventListener('resize', resizeHandler);
+        window.addEventListener('orientationchange', resizeHandler);
+    }
+    
+    
+    setupEventListeners() {
+        document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        document.addEventListener('keyup', (e) => this.handleKeyUp(e));
+        
+        this.canvas.addEventListener('click', () => this.handleJump());
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.handleJump();
+        });
+        
+        document.getElementById('startBtn').addEventListener('click', () => {
+            this.playUISound();
+            this.startGame();
+        });
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            this.playUISound();
+            this.restartGame();
+        });
+        document.getElementById('menuBtn').addEventListener('click', () => {
+            this.playUISound();
+            this.showMenu();
+        });
+        document.getElementById('resumeBtn').addEventListener('click', () => {
+            this.playUISound();
+            this.resumeGame();
+        });
+        document.getElementById('pauseMenuBtn').addEventListener('click', () => {
+            this.playUISound();
+            this.showMenu();
+        });
+        
+    }
+    
+    setupUI() {
+        document.getElementById('highScore').textContent = this.highScore;
+        this.updateScore(0);
+    }
+    
+    handleKeyDown(e) {
+        switch(e.code) {
+            case 'Space':
+                e.preventDefault();
+                this.handleJump();
+                break;
+            case 'KeyP':
+                if (this.gameState === 'playing') {
+                    this.pauseGame();
+                } else if (this.gameState === 'paused') {
+                    this.resumeGame();
+                }
+                break;
+            case 'Escape':
+                if (this.gameState === 'playing' || this.gameState === 'paused') {
+                    this.showMenu();
+                }
+                break;
+        }
+    }
+    
+    handleKeyUp(e) {
+        // Handle key release events if needed
+    }
+    
+    handleJump() {
+        if (this.gameState === 'playing' && this.player) {
+            this.player.jump();
+        } else if (this.gameState === 'start') {
+            this.startGame();
+        } else if (this.gameState === 'gameOver') {
+            this.restartGame();
+        }
+    }
+    
+    startGame() {
+        this.gameState = 'playing';
+        this.score = 0;
+        this.gameSpeed = this.baseSpeed;
+        this.backgroundX = 0;
+        
+        
+        if (this.player && this.player.reset) {
+            this.player.reset();
+        }
+        if (this.obstacleManager && this.obstacleManager.reset) {
+            this.obstacleManager.reset();
+        }
+        
+        document.getElementById('startScreen').classList.add('hidden');
+        document.getElementById('gameOverScreen').classList.add('hidden');
+        document.getElementById('pauseScreen').classList.add('hidden');
+        
+        this.updateScore(0);
+        this.startBackgroundMusic();
+        
+        // Always restart the game loop to ensure it starts
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+        }
+        this.lastTime = 0;
+        this.gameLoop();
+    }
+    
+    pauseGame() {
+        this.gameState = 'paused';
+        document.getElementById('pauseScreen').classList.remove('hidden');
+        this.pauseBackgroundMusic();
+    }
+    
+    resumeGame() {
+        this.gameState = 'playing';
+        document.getElementById('pauseScreen').classList.add('hidden');
+        this.resumeBackgroundMusic();
+    }
+    
+    restartGame() {
+        this.startGame();
+    }
+    
+    showMenu() {
+        this.gameState = 'start';
+        document.getElementById('startScreen').classList.remove('hidden');
+        document.getElementById('gameOverScreen').classList.add('hidden');
+        document.getElementById('pauseScreen').classList.add('hidden');
+        this.stopBackgroundMusic();
+    }
+    
+    gameOver() {
+        this.gameState = 'gameOver';
+        this.stopBackgroundMusic();
+        this.playGameOverSound();
+        
+        
+        if (this.score > this.highScore) {
+            this.highScore = this.score;
+            localStorage.setItem('katanaHighScore', this.highScore.toString());
+            document.getElementById('scoreMessage').textContent = 'New High Score! Legendary!';
+        } else if (this.score > this.highScore * 0.8) {
+            document.getElementById('scoreMessage').textContent = 'Excellent performance!';
+        } else if (this.score > this.highScore * 0.5) {
+            document.getElementById('scoreMessage').textContent = 'Good run, samurai!';
+        } else {
+            document.getElementById('scoreMessage').textContent = 'Keep training, samurai!';
+        }
+        
+        document.getElementById('finalScore').textContent = this.score;
+        document.getElementById('bestScore').textContent = this.highScore;
+        document.getElementById('highScore').textContent = this.highScore;
+        
+        document.getElementById('gameOverScreen').classList.remove('hidden');
+    }
+    
+    updateScore(points) {
+        const oldScore = this.score;
+        // Apply score multiplier to points earned
+        const multipliedPoints = Math.floor(points * this.scoreMultiplier);
+        this.score += multipliedPoints;
+        
+        document.getElementById('current-score').textContent = this.score;
+        
+        if (this.ui && this.ui.updateScore) {
+            this.ui.updateScore(this.score, true);
+        }
+        
+        if (this.score > 0 && this.score % this.speedInterval === 0 && oldScore % this.speedInterval !== 0) {
+            this.gameSpeed += this.speedIncrease;
+        }
+    }
+    
+    update(deltaTime) {
+        if (this.ui && this.ui.update) {
+            this.ui.update(deltaTime);
+        }
+        
+        // Update debug manager if available
+        if (window.debugManager) {
+            window.debugManager.updateLiveStats();
+        }
+        
+        if (this.gameState !== 'playing') return;
+        
+        this.backgroundX -= this.gameSpeed;
+        if (this.backgroundX <= -this.canvas.width) {
+            this.backgroundX = 0;
+        }
+        
+        if (this.player && this.player.update) {
+            this.player.update(deltaTime);
+        }
+        if (this.obstacleManager && this.obstacleManager.update) {
+            this.obstacleManager.update(deltaTime);
+        }
+        
+        if (this.obstacleManager && this.player && this.obstacleManager.checkCollision) {
+            if (this.obstacleManager.checkCollision(this.player)) {
+                this.gameOver();
+            }
+        }
+        
+        if (Math.floor(performance.now() / 100) % this.distanceRate === 0) {
+            this.updateScore(1);
+        }
+    }
+    
+    render() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.drawBackground();
+        
+        if (this.gameState === 'playing' || this.gameState === 'paused') {
+            if (this.obstacleManager && this.obstacleManager.render) {
+                this.obstacleManager.render(this.ctx);
+            }
+            if (this.player && this.player.render) {
+                this.player.render(this.ctx);
+            }
+            
+            if (this.gameState === 'paused') {
+                this.drawPauseOverlay();
+            }
+        }
+        
+        if (this.ui && this.ui.render) {
+            this.ui.render(this.ctx);
+        }
+    }
+    
+    drawBackground() {
+        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        gradient.addColorStop(0, '#1a2040');
+        gradient.addColorStop(1, '#0f1420');
+        
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.drawScrollingBackground();
+    }
+    
+    drawScrollingBackground() {
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.3;
+        
+        const lineSpacing = 50;
+        const lineOffset = this.backgroundX % lineSpacing;
+        
+        this.ctx.strokeStyle = '#4bbbf0';
+        this.ctx.lineWidth = 1;
+        
+        for (let x = lineOffset; x < this.canvas.width + lineSpacing; x += lineSpacing) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, 0);
+            this.ctx.lineTo(x, this.canvas.height);
+            this.ctx.stroke();
+        }
+        
+        for (let y = 0; y < this.canvas.height + lineSpacing; y += lineSpacing) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, y);
+            this.ctx.lineTo(this.canvas.width, y);
+            this.ctx.stroke();
+        }
+        
+        this.ctx.restore();
+    }
+    
+    drawPauseOverlay() {
+        this.ctx.save();
+        this.ctx.fillStyle = 'rgba(16, 22, 49, 0.7)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.restore();
+    }
+    
+    gameLoop(currentTime = 0) {
+        this.deltaTime = currentTime - this.lastTime;
+        this.lastTime = currentTime;
+        
+        this.update(this.deltaTime);
+        this.render();
+        
+        this.animationId = requestAnimationFrame(this.gameLoop);
+    }
+    
+    destroy() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+        }
+        this.stopBackgroundMusic();
+    }
+    
+    // Background music controls
+    startBackgroundMusic() {
+        if (this.backgroundMusic && this.backgroundMusic.play) {
+            this.backgroundMusic.volume = 0.3; // Keep music at lower volume
+            this.backgroundMusic.play().catch(e => {
+                // Audio play failed, which is fine (autoplay restrictions)
+                console.log('Background music autoplay blocked');
+            });
+            this.isMusicPlaying = true;
+        }
+    }
+    
+    pauseBackgroundMusic() {
+        if (this.backgroundMusic && this.isMusicPlaying) {
+            this.backgroundMusic.pause();
+        }
+    }
+    
+    resumeBackgroundMusic() {
+        if (this.backgroundMusic && this.isMusicPlaying) {
+            this.backgroundMusic.play().catch(e => {
+                // Audio play failed, which is fine
+            });
+        }
+    }
+    
+    stopBackgroundMusic() {
+        if (this.backgroundMusic) {
+            this.backgroundMusic.pause();
+            this.backgroundMusic.currentTime = 0;
+            this.isMusicPlaying = false;
+        }
+    }
+    
+    // UI sound effects
+    playUISound() {
+        const uiSound = document.getElementById('uiSound');
+        if (uiSound && uiSound.play) {
+            uiSound.currentTime = 0;
+            uiSound.play().catch(e => {
+                // Audio play failed, which is fine
+            });
+        }
+    }
+    
+    playSettingsSound() {
+        const settingsSound = document.getElementById('settingsSound');
+        if (settingsSound && settingsSound.play) {
+            settingsSound.currentTime = 0;
+            settingsSound.play().catch(e => {
+                // Audio play failed, which is fine
+            });
+        }
+    }
+    
+    playGameOverSound() {
+        const gameOverSound = document.getElementById('gameOverSound');
+        if (gameOverSound && gameOverSound.play) {
+            gameOverSound.currentTime = 0;
+            gameOverSound.play().catch(e => {
+                // Audio play failed, which is fine
+            });
+        }
+    }
+}
+
+let game;
+
+document.addEventListener('DOMContentLoaded', () => {
+    game = new KatanaGame();
+    window.game = game; // Make game available globally for debug manager
+    
+    // Initialize debug manager after game is ready with retry
+    const initDebugManager = () => {
+        if (typeof DebugManager !== 'undefined') {
+            try {
+                window.debugManager = new DebugManager(game);
+            } catch (error) {
+                // Retry once after a longer delay
+                setTimeout(() => {
+                    try {
+                        window.debugManager = new DebugManager(game);
+                    } catch (retryError) {
+                        // Silent failure
+                    }
+                }, 500);
+            }
+        }
+    };
+    
+    setTimeout(initDebugManager, 200);
+});

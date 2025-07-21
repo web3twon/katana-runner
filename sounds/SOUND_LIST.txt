@@ -1,0 +1,68 @@
+KATANA RUNNER - SOUND FILES REFERENCE
+=====================================
+
+This file lists all the sound files needed for the Katana Runner game.
+Place the audio files in the specified folders with the exact names listed.
+
+REQUIRED SOUND FILES:
+====================
+
+📁 sounds/player/
+- jump.mp3          [Player jump/movement sound]
+- land.mp3          [Landing on ground sound] (optional for now)
+
+📁 sounds/game/  
+- score.mp3         [Points earned/obstacle passed]
+- apy-collect.mp3   [Turtle token collection - should sound special/valuable]
+- gameover.mp3      [Game over/collision/death sound]
+
+📁 sounds/ui/
+- button-click.mp3  [Menu button interactions]
+- settings-open.mp3 [Settings menu open] (optional for now)
+
+📁 sounds/ambient/
+- dojo-ambience.mp3 [Background music for gameplay - should loop seamlessly]
+
+📁 sounds/effects/
+- (empty for now - future special effects)
+
+CURRENT GAME AUDIO MAPPINGS:
+===========================
+- jumpSound element         → sounds/player/jump.mp3
+- landSound element         → sounds/player/land.mp3
+- scoreSound element        → sounds/game/score.mp3  
+- apySound element          → sounds/game/apy-collect.mp3 (turtle token collection)
+- gameOverSound element     → sounds/game/gameover.mp3
+- uiSound element           → sounds/ui/button-click.mp3
+- settingsSound element     → sounds/ui/settings-open.mp3
+- backgroundMusic element   → sounds/ambient/dojo-ambience.mp3
+
+FILE FORMAT REQUIREMENTS:
+========================
+- Format: MP3 (best compatibility)
+- File size: Keep under 100KB each for quick loading
+- Quality: 44.1kHz, mono or stereo
+- Length: 0.5-2 seconds for SFX, longer for music
+
+IMPLEMENTATION STATUS:
+====================
+✅ IMPLEMENTED & CODED:
+- jump.mp3               [Player jump sound]
+- score.mp3              [Points earned]
+- apy-collect.mp3        [Turtle token collection]
+- gameover.mp3           [Game over sound]
+- button-click.mp3       [UI button clicks]
+- settings-open.mp3      [Settings menu sound]
+- land.mp3               [Player landing sound]
+- dojo-ambience.mp3      [Background music with auto-loop]
+
+🎵 FEATURES IMPLEMENTED:
+- Background music starts on game start, pauses/resumes with game
+- UI sounds play on all button interactions
+- Landing sound only plays when actually landing from a jump
+- APY collection has dedicated sound (different from score)
+- Volume control: background music at 30% volume
+- Mobile-friendly audio handling with fallbacks
+
+📋 READY FOR AUDIO FILES:
+All sound functionality is coded and ready - just add the MP3 files to the appropriate folders!

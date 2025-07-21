@@ -1,0 +1,5 @@
+hex colors #f6ff0d, #101631, #4bbbf0
+
+website docs with all info 
+https://docs.katana.network/
+

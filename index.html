@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Katana Runner - DeFi Adventure</title>
+    <link rel="stylesheet" href="css/style.css?v=7">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Game Header -->
+        <div class="game-header">
+            <div class="logo">
+                <img src="images/katanaK.jpg" alt="K" class="katana-k-img">
+                <span class="game-title">ATANA RUNNER</span>
+            </div>
+            <div class="score-display">
+                <span id="current-score">0</span>
+            </div>
+        </div>
+
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <!-- Start Screen -->
+        <div id="startScreen" class="screen">
+            <div class="screen-content">
+                <h1>KATANA RUNNER</h1>
+                <p class="tagline">Navigate the DeFi dojo with precision</p>
+                <div class="character-preview">
+                    <img src="images/gameimage.png" alt="Katana Character" class="preview-char">
+                </div>
+                <div class="controls-info">
+                    <p>Press <span class="key">SPACE</span> or <span class="key">CLICK</span> to jump</p>
+                </div>
+                <button id="startBtn" class="game-btn primary">START GAME</button>
+                <div class="high-score">
+                    High Score: <span id="highScore">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" class="screen hidden">
+            <div class="screen-content">
+                <h1 class="game-over-title">GAME OVER</h1>
+                <div class="score-summary">
+                    <p class="final-score">Score: <span id="finalScore">0</span></p>
+                    <p class="best-score">Best: <span id="bestScore">0</span></p>
+                </div>
+                <div class="game-over-message">
+                    <p id="scoreMessage">Keep training, samurai!</p>
+                </div>
+                <div class="game-actions">
+                    <button id="restartBtn" class="game-btn primary">PLAY AGAIN</button>
+                    <button id="menuBtn" class="game-btn secondary">MAIN MENU</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause Screen -->
+        <div id="pauseScreen" class="screen hidden">
+            <div class="screen-content">
+                <h1>PAUSED</h1>
+                <button id="resumeBtn" class="game-btn primary">RESUME</button>
+                <button id="pauseMenuBtn" class="game-btn secondary">MAIN MENU</button>
+            </div>
+        </div>
+
+        <!-- Instructions overlay -->
+        <div class="instructions">
+            <p>Press <span class="key">P</span> to pause • <span class="key">ESC</span> for menu</p>
+        </div>
+
+
+        <!-- Debug Menu -->
+        <div id="debugMenu" class="debug-menu hidden">
+            <div class="debug-header">
+                <h2>🔧 Debug Controls</h2>
+                <button id="debugClose" class="debug-close">×</button>
+            </div>
+            
+            <div class="debug-content">
+                <!-- Player Physics -->
+                <div class="debug-section">
+                    <h3>🏃 Player Physics</h3>
+                    <div class="debug-control">
+                        <label>Gravity</label>
+                        <input type="range" id="gravity" min="0.1" max="2.0" step="0.1" value="0.6">
+                        <span class="debug-value">0.6</span>
+                    </div>
+                    <div class="debug-control">
+                        <label>Jump Force</label>
+                        <input type="range" id="jumpForce" min="5" max="25" step="1" value="12">
+                        <span class="debug-value">12</span>
+                    </div>
+                    <div class="debug-control">
+                        <label>Max Fall Speed</label>
+                        <input type="range" id="maxFallSpeed" min="5" max="20" step="1" value="10">
+                        <span class="debug-value">10</span>
+                    </div>
+                    <div class="debug-control">
+                        <label>Jump Flip Animation</label>
+                        <input type="checkbox" id="jumpFlip" class="debug-checkbox">
+                        <span class="debug-toggle">Disabled</span>
+                    </div>
+                </div>
+
+                <!-- Obstacle Settings -->
+                <div class="debug-section">
+                    <h3>🚧 Obstacles</h3>
+                    <div class="debug-control">
+                        <label>Spawn Delay (frames)</label>
+                        <input type="range" id="spawnDelay" min="30" max="300" step="10" value="120">
+                        <span class="debug-value">120</span>
+                    </div>
+                    <div class="debug-control">
+                        <label>Min Gap Size</label>
+                        <input type="range" id="minGap" min="80" max="250" step="10" value="160">
+                        <span class="debug-value">160</span>
+                    </div>
+                    <div class="debug-control">
+                        <label>Max Gap Size</label>
+                        <input type="range" id="maxGap" min="120" max="300" step="10" value="220">
+                        <span class="debug-value">220</span>
+                    </div>
+                    <div class="debug-control">
+                        <label>Obstacle Width</label>
+                        <input type="range" id="obstacleWidth" min="20" max="100" step="5" value="50">
+                        <span class="debug-value">50</span>
+                    </div>
+                    <div class="debug-control">
+                        <label>Horizontal Spacing</label>
+                        <input type="range" id="horizontalSpacing" min="50" max="200" step="10" value="100">
+                        <span class="debug-value">100</span>
+                    </div>
+                </div>
+
+                <!-- Difficulty Presets -->
+                <div class="debug-section">
+                    <h3>🎯 Difficulty Presets</h3>
+                    <div class="debug-control">
+                        <label>Quick Presets</label>
+                        <select id="difficultyPreset" class="debug-select">
+                            <option value="custom">Custom Settings</option>
+                            <option value="easy">Easy - Large Gaps</option>
+                            <option value="medium">Medium - Balanced</option>
+                            <option value="hard">Hard - Tight Spaces</option>
+                            <option value="insane">Insane - Expert Only</option>
+                        </select>
+                    </div>
+                    <div class="debug-control">
+                        <label>Score Multiplier</label>
+                        <input type="range" id="scoreMultiplier" min="0.5" max="3.0" step="0.1" value="1.0">
+                        <span class="debug-value">1.0x</span>
+                    </div>
+                </div>
+
+                <!-- Game Speed -->
+                <div class="debug-section">
+                    <h3>⚡ Speed & Difficulty</h3>
+                    <div class="debug-control">
+                        <label>Base Speed</label>
+                        <input type="range" id="baseSpeed" min="1" max="10" step="0.5" value="2">
+                        <span class="debug-value">2</span>
+                    </div>
+                    <div class="debug-control">
+                        <label>Speed Increase Rate</label>
+                        <input type="range" id="speedIncrease" min="0" max="1" step="0.05" value="0.2">
+                        <span class="debug-value">0.2</span>
+                    </div>
+                    <div class="debug-control">
+                        <label>Speed Increase Interval</label>
+                        <input type="range" id="speedInterval" min="25" max="100" step="5" value="50">
+                        <span class="debug-value">50</span>
+                    </div>
+                </div>
+
+                <!-- Scoring -->
+                <div class="debug-section">
+                    <h3>🏆 Scoring</h3>
+                    <div class="debug-control">
+                        <label>Points per Obstacle</label>
+                        <input type="range" id="obstaclePoints" min="1" max="20" step="1" value="5">
+                        <span class="debug-value">5</span>
+                    </div>
+                    <div class="debug-control">
+                        <label>Distance Points Rate</label>
+                        <input type="range" id="distanceRate" min="1" max="10" step="1" value="5">
+                        <span class="debug-value">5</span>
+                    </div>
+                </div>
+
+                <!-- Turtle Tokens -->
+                <div class="debug-section">
+                    <h3>🐢 Turtle Tokens</h3>
+                    <div class="debug-control">
+                        <label>Turtle Spawn Rate</label>
+                        <input type="range" id="apySpawnRate" min="1" max="20" step="1" value="10">
+                        <span class="debug-value">10</span>
+                    </div>
+                    <div class="debug-control">
+                        <label>Turtle Token Value</label>
+                        <input type="range" id="apyBonusValue" min="10" max="200" step="10" value="100">
+                        <span class="debug-value">100</span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="debug-section">
+                    <h3>⚙️ Actions</h3>
+                    <div class="debug-actions">
+                        <button id="resetGame" class="debug-btn">Reset Game</button>
+                        <button id="exportSettings" class="debug-btn">Export Settings</button>
+                        <button id="lockSettings" class="debug-btn">🔒 Lock Final Settings</button>
+                        <button id="resetDefaults" class="debug-btn secondary">Reset to Defaults</button>
+                    </div>
+                </div>
+
+                <!-- Live Stats -->
+                <div class="debug-section">
+                    <h3>📊 Live Stats</h3>
+                    <div class="debug-stats">
+                        <div class="stat">Game Speed: <span id="liveSpeed">2.0</span></div>
+                        <div class="stat">Obstacles: <span id="liveObstacles">0</span></div>
+                        <div class="stat">Player Y: <span id="livePlayerY">300</span></div>
+                        <div class="stat">Player Velocity: <span id="liveVelocity">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio elements -->
+    <audio id="jumpSound" preload="auto">
+        <source src="sounds/player/jump.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="landSound" preload="none">
+        <source src="sounds/player/land.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="scoreSound" preload="none">
+        <source src="sounds/game/score.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="apySound" preload="auto">
+        <source src="sounds/game/apy-collect.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="gameOverSound" preload="auto">
+        <source src="sounds/game/gameover.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="uiSound" preload="auto">
+        <source src="sounds/ui/button-click.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="settingsSound" preload="none">
+        <source src="sounds/ui/settings-open.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="backgroundMusic" preload="auto" loop>
+        <source src="sounds/ambient/dojo-ambience.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Game Scripts -->
+    <script src="js/player.js"></script>
+    <script src="js/obstacles.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/debug.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
