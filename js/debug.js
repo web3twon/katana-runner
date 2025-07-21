@@ -30,7 +30,7 @@ class DebugManager {
             scoreMultiplier: 1.0,
             
             // Turtle Tokens
-            apySpawnRate: 10,
+            apySpawnRate: 5,
             apyBonusValue: 100
         };
         
@@ -323,7 +323,7 @@ class DebugManager {
     }
     
     applySettings() {
-        if (!this.game.player || !this.game.obstacleManager) return;
+        if (!this.game.player || !this.game.obstacleManager || !this.isEnabled) return;
         
         // Apply player physics settings
         this.game.player.gravity = this.currentSettings.gravity;
