@@ -331,7 +331,7 @@ class ObstacleManager {
         this.bonusSpawnDelay = 120; // frames between bonus spawns (frequent spawning)
         this.minGap = 160;
         this.maxGap = 220;
-        this.baseObstacleWidth = 80;
+        this.baseObstacleWidth = 50;
         this.minHorizontalSpacing = 100; // Minimum pixels between obstacle groups
         
         // Obstacle-type-specific spacing multipliers

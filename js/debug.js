@@ -1,5 +1,16 @@
 class DebugManager {
     constructor(game) {
+        // CRITICAL: Immediately check environment and exit if not local development
+        const isLocalDev = location.hostname === 'localhost' || 
+                          location.hostname === '127.0.0.1' || 
+                          location.protocol === 'file:';
+        
+        if (!isLocalDev) {
+            this.isEnabled = false;
+            // Exit immediately - don't initialize ANYTHING in production
+            return;
+        }
+        
         this.game = game;
         this.isVisible = false;
         this.settingsButtonRetries = 0;
@@ -99,26 +110,22 @@ class DebugManager {
         }
         
         console.log('DebugManager constructor called - Local development environment detected');
-        console.log('Settings button exists?', !!document.getElementById('settingsBtn'));
         this.isEnabled = true;
         
         try {
             this.setupEventListeners();
-            console.log('Event listeners setup completed');
         } catch (error) {
             console.error('Error setting up event listeners:', error);
         }
         
         try {
             this.setupButtonAndCheckboxListeners();
-            console.log('Button and checkbox listeners setup completed');
         } catch (error) {
             console.error('Error setting up button/checkbox listeners:', error);
         }
         
         try {
             this.initializeControls();
-            console.log('Controls initialization completed');
         } catch (error) {
             console.error('Error initializing controls:', error);
         }
