@@ -327,12 +327,12 @@ class ObstacleManager {
         this.turtleTokens = [];
         this.spawnTimer = 0;
         this.bonusSpawnTimer = 0;
-        this.spawnDelay = 120; // frames between spawns
+        this.spawnDelay = 150; // frames between spawns - consistent with debug defaults
         this.bonusSpawnDelay = 120; // frames between bonus spawns (frequent spawning)
-        this.minGap = 160;
-        this.maxGap = 220;
-        this.baseObstacleWidth = 80;
-        this.minHorizontalSpacing = 100; // Minimum pixels between obstacle groups
+        this.minGap = 200; // consistent with debug defaults
+        this.maxGap = 280; // consistent with debug defaults
+        this.baseObstacleWidth = 50; // consistent with debug defaults
+        this.minHorizontalSpacing = 120; // consistent with debug defaults
         
         // Obstacle-type-specific spacing multipliers
         this.obstacleSpacingMultipliers = {
@@ -347,7 +347,7 @@ class ObstacleManager {
         
         // Turtle token frequency control
         this.obstacleCount = 0;
-        this.turtleSpawnRate = 5; // Spawn turtle token every N obstacles
+        this.turtleSpawnRate = 10; // Spawn turtle token every N obstacles
     }
     
     reset() {

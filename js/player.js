@@ -8,9 +8,9 @@ class Player {
         this.height = 40;
         
         this.velocityY = 0;
-        this.gravity = 0.6;
-        this.jumpForce = -12;
-        this.maxFallSpeed = 10;
+        this.gravity = 0.5; // consistent with debug defaults
+        this.jumpForce = -10; // consistent with debug defaults (applied as negative)
+        this.maxFallSpeed = 8; // consistent with debug defaults
         this.groundY = this.getCanvasHeight() - this.height - 20;
         
         this.isJumping = false;

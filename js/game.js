@@ -8,12 +8,12 @@ class KatanaGame {
         this.highScore = parseInt(localStorage.getItem('katanaHighScore')) || 0;
         
         this.gameSpeed = 1.5;
-        this.baseSpeed = 1.5;
-        this.speedIncrease = 0.15;
-        this.speedInterval = 50;
-        this.obstaclePoints = 5;
-        this.distanceRate = 5;
-        this.scoreMultiplier = 1.0;
+        this.baseSpeed = 1.5; // consistent with debug defaults
+        this.speedIncrease = 0.15; // consistent with debug defaults  
+        this.speedInterval = 50; // consistent with debug defaults
+        this.obstaclePoints = 5; // consistent with debug defaults
+        this.distanceRate = 5; // consistent with debug defaults
+        this.scoreMultiplier = 1.0; // consistent with debug defaults
         this.backgroundX = 0;
         
         this.animationId = null;
@@ -459,6 +459,66 @@ class KatanaGame {
             });
         }
     }
+    
+    // Apply default settings to ensure consistency between local and remote environments
+    applyDefaultSettings() {
+        // These defaults match the debug system's defaults to ensure consistent gameplay
+        const defaultSettings = {
+            // Player Physics
+            gravity: 0.5,
+            jumpForce: 10, // applied as negative
+            maxFallSpeed: 8,
+            
+            // Obstacles  
+            spawnDelay: 150,
+            minGap: 200,
+            maxGap: 280,
+            obstacleWidth: 50,
+            horizontalSpacing: 120,
+            
+            // Game Speed
+            baseSpeed: 1.5,
+            speedIncrease: 0.15,
+            speedInterval: 50,
+            
+            // Scoring
+            obstaclePoints: 5,
+            distanceRate: 5,
+            scoreMultiplier: 1.0,
+            
+            // Turtle Tokens
+            apySpawnRate: 10
+        };
+        
+        // Apply player physics settings
+        if (this.player) {
+            this.player.gravity = defaultSettings.gravity;
+            this.player.jumpForce = -defaultSettings.jumpForce;
+            this.player.maxFallSpeed = defaultSettings.maxFallSpeed;
+        }
+        
+        // Apply obstacle settings
+        if (this.obstacleManager) {
+            this.obstacleManager.spawnDelay = defaultSettings.spawnDelay;
+            this.obstacleManager.minGap = defaultSettings.minGap;
+            this.obstacleManager.maxGap = defaultSettings.maxGap;
+            this.obstacleManager.baseObstacleWidth = defaultSettings.obstacleWidth;
+            this.obstacleManager.minHorizontalSpacing = defaultSettings.horizontalSpacing;
+            this.obstacleManager.turtleSpawnRate = defaultSettings.apySpawnRate;
+        }
+        
+        // Apply game speed settings
+        this.baseSpeed = defaultSettings.baseSpeed;
+        this.speedIncrease = defaultSettings.speedIncrease;
+        this.speedInterval = defaultSettings.speedInterval;
+        
+        // Apply scoring settings
+        this.obstaclePoints = defaultSettings.obstaclePoints;
+        this.distanceRate = defaultSettings.distanceRate;
+        this.scoreMultiplier = defaultSettings.scoreMultiplier;
+        
+        console.log('Applied default settings for consistent gameplay across all environments');
+    }
 }
 
 let game;
@@ -490,11 +550,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     } catch (retryError) {
                         console.error('Debug manager retry failed:', retryError);
                         console.error('Retry error stack:', retryError.stack);
+                        // If debug manager fails to initialize, ensure defaults are still applied
+                        game.applyDefaultSettings();
                     }
                 }, 500);
             }
         } else {
-            console.error('DebugManager class not found!');
+            console.log('DebugManager class not found - applying default settings for consistent gameplay');
+            // If debug manager is not available (production), apply default settings
+            game.applyDefaultSettings();
         }
     };
     
