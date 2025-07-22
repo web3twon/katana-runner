@@ -21,6 +21,9 @@ class KatanaGame {
         
         this.deltaTime = 0;
         
+        // Track key states for precise jumping
+        this.keysPressed = new Set();
+        
         this.setupCanvas();
         
         this.player = new Player(this);
@@ -146,10 +149,20 @@ class KatanaGame {
     }
     
     handleKeyDown(e) {
+        const jumpKeys = ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+        
         switch(e.code) {
             case 'Space':
+            case 'ArrowUp':
+            case 'ArrowDown':
+            case 'ArrowLeft':
+            case 'ArrowRight':
                 e.preventDefault();
-                this.handleJump();
+                // Only jump if key wasn't already pressed (prevents holding to spam jump)
+                if (!this.keysPressed.has(e.code)) {
+                    this.keysPressed.add(e.code);
+                    this.handleJump();
+                }
                 break;
             case 'KeyP':
                 if (this.gameState === 'playing') {
@@ -167,7 +180,11 @@ class KatanaGame {
     }
     
     handleKeyUp(e) {
-        // Handle key release events if needed
+        const jumpKeys = ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+        
+        if (jumpKeys.includes(e.code)) {
+            this.keysPressed.delete(e.code);
+        }
     }
     
     handleJump() {
