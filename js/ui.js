@@ -37,7 +37,7 @@ class GameUI {
             scoreElement.textContent = newScore;
         }
         
-        if (newScore > 0 && newScore % 100 === 0) {
+        if (newScore > 0 && newScore % 500 === 0) {
             this.showScoreMilestone(newScore);
         }
         
@@ -71,7 +71,7 @@ class GameUI {
         this.addNotification(`${score} Points!`, 'milestone');
     }
     
-    addNotification(text, type = 'default', duration = 2000) {
+    addNotification(text, type = 'default', duration = 1000) {
         const notification = {
             text,
             type,
