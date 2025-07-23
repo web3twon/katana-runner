@@ -226,34 +226,25 @@ body {
     transform: translateY(0);
 }
 
-/* Mute Button - Half size of other buttons */
+/* Mute Button - Same style as primary buttons */
 .game-btn.mute-btn {
-    padding: 6px 12px;
-    font-size: 14px;
-    min-width: 50px;
-    margin: 4px;
-    background: var(--katana-light);
-    color: var(--katana-yellow);
-    border: 1px solid var(--katana-light);
-    transition: all 0.3s ease;
+    background: var(--katana-yellow);
+    color: var(--katana-navy);
+    min-width: 60px;
 }
 
 .game-btn.mute-btn:hover {
-    transform: translateY(-1px);
-    background: rgba(26, 32, 64, 0.8);
-    box-shadow: 0 2px 8px rgba(246, 255, 13, 0.2);
+    box-shadow: 0 4px 15px var(--glow-color);
 }
 
 .game-btn.mute-btn.muted {
-    background: var(--katana-dark);
-    color: rgba(246, 255, 13, 0.5);
-    border: 1px solid rgba(26, 32, 64, 0.5);
-    opacity: 0.8;
+    background: var(--katana-blue);
+    color: var(--katana-navy);
+    opacity: 0.7;
 }
 
 .game-btn.mute-btn.muted:hover {
-    background: rgba(10, 15, 31, 0.8);
-    box-shadow: 0 2px 8px rgba(246, 255, 13, 0.1);
+    box-shadow: 0 4px 15px rgba(75, 187, 240, 0.4);
 }
 
 /* Score Display */
