@@ -352,6 +352,7 @@ class Player {
     }
 
     playJumpSound() {
+        if (this.game.isMuted) return;
         if (this.audioContext && this.jumpBuffer) {
             // Use Web Audio API for low-latency playback
             try {
@@ -370,6 +371,7 @@ class Player {
     }
 
     playJumpSoundHTML5() {
+        if (this.game.isMuted) return;
         const jumpSound = document.getElementById('jumpSound');
         if (jumpSound && jumpSound.play) {
             jumpSound.play().catch(e => {
@@ -379,6 +381,7 @@ class Player {
     }
     
     playLandSound() {
+        if (this.game.isMuted) return;
         const landSound = document.getElementById('landSound');
         if (landSound && landSound.play) {
             landSound.currentTime = 0;

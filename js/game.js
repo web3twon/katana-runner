@@ -33,6 +33,7 @@ class KatanaGame {
         // Audio system
         this.backgroundMusic = document.getElementById('backgroundMusic');
         this.isMusicPlaying = false;
+        this.isMuted = localStorage.getItem('katanaMuted') === 'true';
         
         this.setupEventListeners();
         this.setupUI();
@@ -140,12 +141,16 @@ class KatanaGame {
             this.playUISound();
             this.showMenu();
         });
+        document.getElementById('muteBtn').addEventListener('click', () => {
+            this.toggleMute();
+        });
         
     }
     
     setupUI() {
         document.getElementById('highScore').textContent = this.highScore;
         this.updateScore(0);
+        this.updateMuteButton();
     }
     
     handleKeyDown(e) {
@@ -414,6 +419,7 @@ class KatanaGame {
     
     // Background music controls
     startBackgroundMusic() {
+        if (this.isMuted) return;
         if (this.backgroundMusic && this.backgroundMusic.play) {
             this.backgroundMusic.volume = 0.3; // Keep music at lower volume
             this.backgroundMusic.play().catch(e => {
@@ -431,6 +437,7 @@ class KatanaGame {
     }
     
     resumeBackgroundMusic() {
+        if (this.isMuted) return;
         if (this.backgroundMusic && this.isMusicPlaying) {
             this.backgroundMusic.play().catch(e => {
                 // Audio play failed, which is fine
@@ -448,6 +455,7 @@ class KatanaGame {
     
     // UI sound effects
     playUISound() {
+        if (this.isMuted) return;
         const uiSound = document.getElementById('uiSound');
         if (uiSound && uiSound.play) {
             uiSound.currentTime = 0;
@@ -458,6 +466,7 @@ class KatanaGame {
     }
     
     playSettingsSound() {
+        if (this.isMuted) return;
         const settingsSound = document.getElementById('settingsSound');
         if (settingsSound && settingsSound.play) {
             settingsSound.currentTime = 0;
@@ -468,12 +477,40 @@ class KatanaGame {
     }
     
     playGameOverSound() {
+        if (this.isMuted) return;
         const gameOverSound = document.getElementById('gameOverSound');
         if (gameOverSound && gameOverSound.play) {
             gameOverSound.currentTime = 0;
             gameOverSound.play().catch(e => {
                 // Audio play failed, which is fine
             });
+        }
+    }
+
+    // Mute functionality
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        localStorage.setItem('katanaMuted', this.isMuted.toString());
+        
+        if (this.isMuted) {
+            this.pauseBackgroundMusic();
+        } else if (this.gameState === 'playing') {
+            this.resumeBackgroundMusic();
+        }
+        
+        this.updateMuteButton();
+    }
+
+    updateMuteButton() {
+        const muteBtn = document.getElementById('muteBtn');
+        if (muteBtn) {
+            if (this.isMuted) {
+                muteBtn.textContent = '🔇';
+                muteBtn.classList.add('muted');
+            } else {
+                muteBtn.textContent = '🔊';
+                muteBtn.classList.remove('muted');
+            }
         }
     }
     

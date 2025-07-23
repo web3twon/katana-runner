@@ -226,6 +226,36 @@ body {
     transform: translateY(0);
 }
 
+/* Mute Button - Half size of other buttons */
+.game-btn.mute-btn {
+    padding: 6px 12px;
+    font-size: 14px;
+    min-width: 50px;
+    margin: 4px;
+    background: var(--katana-light);
+    color: var(--katana-yellow);
+    border: 1px solid var(--katana-light);
+    transition: all 0.3s ease;
+}
+
+.game-btn.mute-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(26, 32, 64, 0.8);
+    box-shadow: 0 2px 8px rgba(246, 255, 13, 0.2);
+}
+
+.game-btn.mute-btn.muted {
+    background: var(--katana-dark);
+    color: rgba(246, 255, 13, 0.5);
+    border: 1px solid rgba(26, 32, 64, 0.5);
+    opacity: 0.8;
+}
+
+.game-btn.mute-btn.muted:hover {
+    background: rgba(10, 15, 31, 0.8);
+    box-shadow: 0 2px 8px rgba(246, 255, 13, 0.1);
+}
+
 /* Score Display */
 .high-score, .score-summary {
     margin: 20px 0;

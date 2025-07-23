@@ -837,6 +837,7 @@ class ObstacleManager {
     }
     
     playScoreSound() {
+        if (this.game.isMuted) return;
         const scoreSound = document.getElementById('scoreSound');
         if (scoreSound && scoreSound.play) {
             scoreSound.currentTime = 0;
@@ -847,6 +848,7 @@ class ObstacleManager {
     }
     
     playBonusSound() {
+        if (this.game.isMuted) return;
         // Use dedicated turtle collection sound (keeping apy-collect.mp3 for now)
         const apySound = document.getElementById('apySound');
         if (apySound && apySound.play) {

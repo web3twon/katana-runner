@@ -330,6 +330,7 @@ class GameUI {
     }
     
     playGameOverSound() {
+        if (this.game.isMuted) return;
         const gameOverSound = document.getElementById('gameOverSound');
         if (gameOverSound && gameOverSound.play) {
             gameOverSound.currentTime = 0;
